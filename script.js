@@ -3,14 +3,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
     
-    function addTask() {
-        const taskText = taskInput.value.trim();
-        
-        if (taskText === "") {
-            alert("Please enter a task.");
-            return;
+    let tasks = [];
+    
+    function loadTasks() {
+        const savedTasks = localStorage.getItem('tasks');
+        if (savedTasks) {
+            tasks = JSON.parse(savedTasks);
+            tasks.forEach(taskText => {
+                createTaskElement(taskText);
+            });
         }
-        
+    }
+    
+    function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    
+    function createTaskElement(taskText) {
         const li = document.createElement('li');
         li.textContent = taskText;
         
@@ -20,10 +29,30 @@ document.addEventListener('DOMContentLoaded', function() {
         
         removeButton.onclick = function() {
             taskList.removeChild(li);
+            
+            const taskIndex = tasks.indexOf(taskText);
+            if (taskIndex > -1) {
+                tasks.splice(taskIndex, 1);
+            }
+            
+            saveTasks();
         };
         
         li.appendChild(removeButton);
         taskList.appendChild(li);
+    }
+    
+    function addTask() {
+        const taskText = taskInput.value.trim();
+        
+        if (taskText === "") {
+            alert("Please enter a task.");
+            return;
+        }
+        
+        tasks.push(taskText);
+        createTaskElement(taskText);
+        saveTasks();
         taskInput.value = "";
     }
     
@@ -34,6 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
             addTask();
         }
     });
+    
+    loadTasks();
 });
 
 document.addEventListener('DOMContentLoaded', function() {
